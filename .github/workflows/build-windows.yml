@@ -93,3 +93,11 @@ jobs:
           name: witbound-windows-msi
           path: build/compose/binaries/main/msi/*.msi
           if-no-files-found: error
+
+      - name: VirusTotal scan (if enabled)
+        if: ${{ vars.VT_ENABLED == 'true' }}
+        uses: crazy-max/ghaction-virustotal@v4
+        with:
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          files: |
+            build/compose/binaries/main/msi/*.msi
