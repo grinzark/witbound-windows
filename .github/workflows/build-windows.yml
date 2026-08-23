@@ -47,6 +47,23 @@ jobs:
           New-Item -ItemType Directory -Force app-resources/windows/models | Out-Null
           curl.exe -L -o app-resources/windows/models/ggml-base.en.bin "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin"
 
+      - name: Sign bundled binaries (if signing configured)
+        if: ${{ vars.SIGNING_ENABLED == 'true' }}
+        uses: azure/trusted-signing-action@v0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ vars.TRUSTED_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ vars.TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ vars.TRUSTED_SIGNING_PROFILE }}
+          files-folder: app-resources/windows/bin
+          files-folder-filter: exe,dll
+          files-folder-recurse: true
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
       - name: Build MSI
         shell: cmd
         run: gradlew.bat packageMsi --no-daemon --stacktrace
@@ -54,6 +71,22 @@ jobs:
       - name: Locate MSI
         shell: pwsh
         run: Get-ChildItem -Recurse build/compose/binaries -Filter *.msi
+
+      - name: Sign MSI (if signing configured)
+        if: ${{ vars.SIGNING_ENABLED == 'true' }}
+        uses: azure/trusted-signing-action@v0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ vars.TRUSTED_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ vars.TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ vars.TRUSTED_SIGNING_PROFILE }}
+          files-folder: build/compose/binaries/main/msi
+          files-folder-filter: msi
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
 
       - uses: actions/upload-artifact@v4
         with:
