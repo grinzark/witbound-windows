@@ -5,6 +5,11 @@ transcribe + align an ebook with its audiobook — then sends the finished book 
 the phone over the LAN, already synced. Same pairId + RASM map + `_witbound._tcp`
 protocol as the Mac app, so the phone can't tell which computer sent it.
 
+## Code signing
+Windows builds are signed through the [SignPath Foundation](https://signpath.org)'s
+free code-signing program for open-source projects (certificate by
+[SignPath.io](https://signpath.io)). Signed installers ship once the project is approved.
+
 ## Layout
 - `src/main/kotlin/app/witbound/core/` — reused verbatim from the Android app
   (Aligner, Tokenizer, SyncMapBuilder, EpubParser) + extracted models, SyncMap
